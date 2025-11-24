@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<azform>
+    <formId>LATC_FuelLogForm</formId>
+    <formType>Simple List and Details</formType>
+    <layout>
+        <grid>
+            <columns>
+                <column>LogId</column>
+                <column>VoyageId</column>
+                <column>LogDate</column>
+                <column>VesselId</column>
+                <column>TotalAmount</column>
+            </columns>
+        </grid>
+        <detailsPanel>
+            <tabs>
+                <tab name="General">
+                    <fields>
+                        <field>LogId</field>
+                        <field>VoyageId</field>
+                        <field>VesselId</field>
+                        <field>LogDate</field>
+                        <field>LoggedBy</field>
+                    </fields>
+                </tab>
+                <tab name="Consumption">
+                    <fields>
+                        <field>FuelTypeId</field>
+                        <field>QuantityConsumed</field>
+                        <field>UnitPrice</field>
+                        <field>TotalAmount</field>
+                        <field>MeterReading</field>
+                    </fields>
+                </tab>
+                <tab name="Cost Allocation">
+                    <fields>
+                        <field>VoyageAllocation</field>
+                        <field>DepartmentAllocation</field>
+                        <field>AccountingDistribution</field>
+                    </fields>
+                </tab>
+            </tabs>
+        </detailsPanel>
+    </layout>
+</azform>
