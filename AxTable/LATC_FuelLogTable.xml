@@ -1,0 +1,34 @@
+<Table Id="LATC_FuelLogTable" Schema="dbo" TableType="Normal">
+    <Fields>
+        <Field Name="LogId" ExtendedDataType="LogId" IsPrimaryKey="True" />
+        <Field Name="VoyageId" ExtendedDataType="VoyageId" />
+        <Field Name="VesselId" ExtendedDataType="VesselId" />
+        <Field Name="LogDate" ExtendedDataType="DateTime" />
+        <Field Name="LoggedBy" ExtendedDataType="Name" />
+        <Field Name="FuelTypeId" ExtendedDataType="FuelTypeId" />
+        <Field Name="QuantityConsumed" ExtendedDataType="Quantity" />
+        <Field Name="UnitPrice" ExtendedDataType="Money" />
+        <Field Name="TotalAmount" ExtendedDataType="Money" />
+        <Field Name="MeterReading" ExtendedDataType="Integer" />
+        <Field Name="VoyageAllocation" ExtendedDataType="Dimension" />
+        <Field Name="DepartmentAllocation" ExtendedDataType="Dimension" />
+        <Field Name="WorkflowStatus" ExtendedDataType="Enum" />
+        <Field Name="SubmittedBy" ExtendedDataType="Name" />
+        <Field Name="ApprovedBy" ExtendedDataType="Name" />
+        <Field Name="ApprovalDate" ExtendedDataType="DateTime" />
+    </Fields>
+    <Relations>
+        <Relation>
+            <TableId>Hello to</TableId>
+            <ReferencedTableId>VoyageTable</ReferencedTableId>
+        </Relation>
+        <Relation>
+            <TableId>Hello to</TableId>
+            <ReferencedTableId>VesselTable</ReferencedTableId>
+        </Relation>
+        <Relation>
+            <TableId>Hello to</TableId>
+            <ReferencedTableId>FuelTypeTable</ReferencedTableId>
+        </Relation>
+    </Relations>
+</Table>
