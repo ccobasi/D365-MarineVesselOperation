@@ -1,0 +1,127 @@
+/// <summary>
+/// Service class for fuel log operations including real-time cost calculations
+/// </summary>
+class LATC_FuelLogService
+{
+    /// <summary>
+    /// Calculates total amount based on quantity and unit price
+    /// </summary>
+    /// <param name="_quantity">Quantity consumed</param>
+    /// <param name="_unitPrice">Unit price of fuel</param>
+    /// <returns>Total amount</returns>
+    public static Amount calculateTotalAmount(Quantity _quantity, Money _unitPrice)
+    {
+        return _quantity * _unitPrice;
+    }
+
+    /// <summary>
+    /// Validates fuel log data before saving
+    /// </summary>
+    /// <param name="_fuelLog">Fuel log record</param>
+    /// <returns>True if valid, false otherwise</returns>
+    public static boolean validateFuelLog(LATC_FuelLogTable _fuelLog)
+    {
+        boolean ret = true;
+
+        if (!_fuelLog.VoyageId)
+        {
+            error("Voyage ID is required");
+            ret = false;
+        }
+
+        if (!_fuelLog.VesselId)
+        {
+            error("Vessel ID is required");
+            ret = false;
+        }
+
+        if (_fuelLog.QuantityConsumed <= 0)
+        {
+            error("Quantity consumed must be greater than zero");
+            ret = false;
+        }
+
+        if (_fuelLog.UnitPrice <= 0)
+        {
+            error("Unit price must be greater than zero");
+            ret = false;
+        }
+
+        return ret;
+    }
+
+    /// <summary>
+    /// Updates total amount when quantity or price changes
+    /// </summary>
+    /// <param name="_fuelLog">Fuel log record</param>
+    public static void updateTotalAmount(LATC_FuelLogTable _fuelLog)
+    {
+        _fuelLog.TotalAmount = LATC_FuelLogService::calculateTotalAmount(
+            _fuelLog.QuantityConsumed, 
+            _fuelLog.UnitPrice
+        );
+    }
+
+    /// <summary>
+    /// Creates a new fuel log entry
+    /// </summary>
+    /// <param name="_voyageId">Voyage ID</param>
+    /// <param name="_vesselId">Vessel ID</param>
+    /// <param name="_fuelTypeId">Fuel type ID</param>
+    /// <param name="_quantity">Quantity consumed</param>
+    /// <param name="_unitPrice">Unit price</param>
+    /// <returns>Created fuel log record</returns>
+    public static LATC_FuelLogTable createFuelLog(
+        VoyageId _voyageId,
+        VesselId _vesselId,
+        FuelTypeId _fuelTypeId,
+        Quantity _quantity,
+        Money _unitPrice)
+    {
+        LATC_FuelLogTable fuelLog;
+
+        ttsbegin;
+        
+        fuelLog.LogId = NumberSeq::newGetNum(LATC_FuelLogParameters::numRefLogId()).num();
+        fuelLog.VoyageId = _voyageId;
+        fuelLog.VesselId = _vesselId;
+        fuelLog.FuelTypeId = _fuelTypeId;
+        fuelLog.QuantityConsumed = _quantity;
+        fuelLog.UnitPrice = _unitPrice;
+        fuelLog.LogDate = DateTimeUtil::getSystemDateTime();
+        fuelLog.LoggedBy = curUserId();
+        fuelLog.WorkflowStatus = LATC_WorkflowStatus::Draft;
+
+        LATC_FuelLogService::updateTotalAmount(fuelLog);
+
+        if (LATC_FuelLogService::validateFuelLog(fuelLog))
+        {
+            fuelLog.insert();
+        }
+
+        ttscommit;
+
+        return fuelLog;
+    }
+
+    /// <summary>
+    /// Submits fuel log for approval
+    /// </summary>
+    /// <param name="_fuelLog">Fuel log record</param>
+    public static void submitForApproval(LATC_FuelLogTable _fuelLog)
+    {
+        ttsbegin;
+        
+        _fuelLog.selectForUpdate(true);
+        _fuelLog.WorkflowStatus = LATC_WorkflowStatus::Submitted;
+        _fuelLog.SubmittedBy = curUserId();
+        _fuelLog.update();
+
+        // Trigger workflow
+        LATC_FuelLogWorkflow::submitToWorkflow(_fuelLog);
+
+        ttscommit;
+
+        info(strFmt("Fuel log %1 submitted for approval", _fuelLog.LogId));
+    }
+}
